@@ -21,30 +21,18 @@ pip install aiohttp
 
 ## How to Add a YouTube Link
 
-To download transcripts for new videos, you don't add the full link; instead, you extract the **Video ID** and add it to the script.
-
-For example, if your YouTube link is:
-`https://www.youtube.com/watch?v=VAEWEHIoTFo`
-
-The Video ID is the part after `v=`, which is `VAEWEHIoTFo`.
-
-1. Open `fetch_transcripts.py`.
-2. Locate the `VIDEO_IDS` list at the beginning of the script.
-3. Add your Video ID as a string to the list:
-
-```python
-VIDEO_IDS = [
-    "VAEWEHIoTFo",
-    "YOUR_NEW_VIDEO_ID_HERE"
-]
-```
+You can now fetch transcripts for a single video or an entire playlist by simply passing the URL as an argument when running the script! The script uses `yt-dlp` to extract the video IDs automatically.
 
 ## How to Run
 
-Once you have added your desired Video IDs, simply run the script from your terminal:
+Run the script from your terminal and pass the YouTube URL (video or playlist) like this:
 
 ```bash
-python fetch_transcripts.py
+# For a playlist
+python fetch_transcripts.py "https://youtube.com/playlist?list=YOUR_PLAYLIST_ID"
+
+# For a single video
+python fetch_transcripts.py "https://www.youtube.com/watch?v=YOUR_VIDEO_ID"
 ```
 
-The script will fetch the transcripts concurrently and save them as `.txt` files in the `transcripts/` folder.
+The script will fetch the transcripts concurrently and save them as `.txt` files in the `backend/` folder.

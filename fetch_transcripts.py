@@ -3,13 +3,25 @@ import aiohttp
 import uuid
 import json
 import os
-
-VIDEO_IDS = [
-    "VAEWEHIoTFo",
-]
+import sys
+import subprocess
 
 API_URL = "https://notegpt.io/api/v2/video-transcript"
-OUTPUT_DIR = "transcripts"
+OUTPUT_DIR = "backend"
+
+def get_video_ids(url):
+    print(f"Fetching video IDs from: {url}")
+    try:
+        result = subprocess.run(
+            ["yt-dlp", "--flat-playlist", "--get-id", url],
+            capture_output=True, text=True, check=True
+        )
+        ids = [vid.strip() for vid in result.stdout.split('\n') if vid.strip()]
+        print(f"Found {len(ids)} videos.")
+        return ids
+    except subprocess.CalledProcessError as e:
+        print(f"Error fetching video IDs: {e}")
+        return []
 
 
 def sanitize_filename(name):
@@ -64,10 +76,23 @@ def save_as_text(result):
 
 
 async def main():
+    if len(sys.argv) > 1:
+        url = sys.argv[1]
+        video_ids = get_video_ids(url)
+    else:
+        video_ids = [
+            "VAEWEHIoTFo",
+        ]
+        print("No URL provided, using default video IDs.")
+
+    if not video_ids:
+        print("No video IDs to process. Exiting.")
+        return
+
     os.makedirs(OUTPUT_DIR, exist_ok=True)
 
     async with aiohttp.ClientSession() as session:
-        tasks = [fetch_transcript(session, vid) for vid in VIDEO_IDS]
+        tasks = [fetch_transcript(session, vid) for vid in video_ids]
         results = await asyncio.gather(*tasks)
 
     saved = 0
@@ -77,7 +102,7 @@ async def main():
             print(f"[SAVED] {result['video_id']} — \"{result['title']}\" → {path}")
             saved += 1
 
-    print(f"\nDone. {saved}/{len(VIDEO_IDS)} transcripts saved to ./{OUTPUT_DIR}/")
+    print(f"\nDone. {saved}/{len(video_ids)} transcripts saved to ./{OUTPUT_DIR}/")
 
 
 if __name__ == "__main__":
